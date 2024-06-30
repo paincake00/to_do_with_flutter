@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:to_do/models/app_settings.dart';
 import 'package:to_do/models/task.dart';
 
 class TaskDB extends ChangeNotifier {
@@ -9,34 +10,35 @@ class TaskDB extends ChangeNotifier {
   static Future<void> initialize() async {
     final dir = await getApplicationDocumentsDirectory();
     isar = await Isar.open(
-      [TaskSchema],
+      [TaskSchema, AppSettingsSchema],
       directory: dir.path,
     );
   }
 
-  // // save theme settings
-  // Future<void> saveThemeSettings() async {
-  //   final existingSettings = await isar.themeSettings.where().findFirst();
-  //   if (existingSettings == null) {
-  //     final settings = ThemeSettings();
-  //     await isar.writeTxn(() => isar.themeSettings.put(settings));
-  //   }
-  // }
+  // save theme settings
+  Future<void> saveThemeSettings() async {
+    final existingSettings = await isar.appSettings.where().findFirst();
+    if (existingSettings == null) {
+      final settings = AppSettings()..isDarkMode = false;
+      await isar.writeTxn(() => isar.appSettings.put(settings));
+    }
+  }
 
-  // // get theme settings
-  // Future<bool> getThemeSettings() async {
-  //   final settings = await isar.themeSettings.where().findFirst();
-  //   return settings!.isDarkMode;
-  // }
+  // get theme settings
+  Future<bool?> getThemeStatus() async {
+    final settings = await isar.appSettings.where().findFirst();
+    return settings!.isDarkMode;
+  }
 
-  // // set theme settings
-  // Future<void> setThemeSettings(bool value) async {
-  //   final settings = await isar.themeSettings.where().findFirst();
-  //   if (settings == null) {
-  //     settings!.isDarkMode = value;
-  //     await isar.writeTxn(() => isar.themeSettings.put(settings));
-  //   }
-  // }
+  // set theme settings
+  Future<void> setThemeSettings(bool value) async {
+    final settings = await isar.appSettings.where().findFirst();
+    if (settings == null) {
+      saveThemeSettings();
+    }
+    settings!.isDarkMode = value;
+    await isar.writeTxn(() => isar.appSettings.put(settings));
+  }
 
   // current task
   final List<Task> currentTasks = [];

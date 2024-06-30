@@ -8,12 +8,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await TaskDB.initialize();
+  await TaskDB().saveThemeSettings();
+
+  final status = await TaskDB().getThemeStatus();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => TaskDB()),
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(
+            create: (context) =>
+                ThemeProvider()..setThemeData(isDarkMode: status!)),
       ],
       child: const MyApp(),
     ),

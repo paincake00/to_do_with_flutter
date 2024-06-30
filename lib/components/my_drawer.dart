@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:to_do/db/task_db.dart';
 import 'package:to_do/themes/theme_provider.dart';
 
 class MyDrawer extends StatelessWidget {
@@ -34,13 +35,18 @@ class MyDrawer extends StatelessWidget {
             width: 100,
             height: 100,
             child: FittedBox(
-                child: Switch(
-                    value: Provider.of<ThemeProvider>(context).isDarkMode,
-                    activeColor: Colors.yellow,
-                    onChanged: (_) {
-                      Provider.of<ThemeProvider>(context, listen: false)
-                          .toggleTheme();
-                    })),
+              child: Consumer<ThemeProvider>(
+                builder: (context, value, child) => Switch(
+                  value: value.isDarkMode,
+                  activeColor: Colors.yellow,
+                  onChanged: (_) {
+                    value.toggleTheme();
+                    Provider.of<TaskDB>(context, listen: false)
+                        .setThemeSettings(value.isDarkMode);
+                  },
+                ),
+              ),
+            ),
           ),
         ],
       ),
